@@ -2,6 +2,7 @@
 #include <math.h>
 #include "lut.h"
 #include <iostream>
+#include <memory>
 
 class DDS {
 
@@ -23,6 +24,7 @@ class DDS {
         SI = 10
     };
 
+    virtual ~DDS() {};
     virtual void update() = 0;
     virtual void setNote(notas nota) = 0;
     virtual void enableRealtimeVolumeControl(bool enable) = 0;
@@ -50,7 +52,7 @@ class LutDDS : public DDS {
 
         // Generate LUT according to period, function and number of points
 
-        this->LUT = new int[npoints];
+        this->LUT = new int[npoints]; // using smart pointers here would just make the code either slower (std::vector) or unreadable
         float min_fn = std::numeric_limits<float>::max();
         float max_fn = std::numeric_limits<float>::min();
 
@@ -71,6 +73,10 @@ class LutDDS : public DDS {
             this->steps_lut[i] = (int) (npoints * step  / period) * powf32(1.06f,i);
         }
 
+    }
+
+    ~LutDDS() {
+        delete LUT;
     }
 
 
@@ -116,10 +122,11 @@ class RealtimeDDS : public DDS {
 
     public:
 
-    RealtimeDDS(float (*ft)(float t),float period, float step) {
-        this->period = period;
+    RealtimeDDS(float (*ft)(float t), float step, float ft_min, float ft_max) {
         this->step = step;
         this->f = ft;
+        this->ft_max = ft_max;
+        this->ft_min = ft_min;
     }
 
     void update() {
@@ -127,9 +134,9 @@ class RealtimeDDS : public DDS {
         // PWM write position @TODO
         std::cout << "t = " << current_time;
         if(!volume_control_enabled) {
-            std::cout << "; generated -> " << (int) (f(current_time) * pwm_max) << std::endl;
+            std::cout << "; generated -> " << (int) ((f(current_time) - ft_min) * pwm_max / (ft_max-ft_min)) << std::endl;
         } else {
-            std::cout << "; generated -> " << std::min((int)(f(current_time) * volume * pwm_max),pwm_max)<< std::endl;
+            std::cout << "; generated -> " << std::min((int) ((f(current_time) - ft_min) * pwm_max / (ft_max-ft_min) * volume)),pwm_max)<< std::endl;
         }
 
         current_time += step * multiplier;
@@ -159,28 +166,29 @@ class RealtimeDDS : public DDS {
     float multiplier = 0;
     bool volume_control_enabled = 0;
     float volume;
+    float ft_max = 1;
+    float ft_min = 0;
 
 
 };
 
 
 float sine(float t) { // will be used as the input function for the dds. Se asume que la frecuencia de la funcion es do grave.
-    const float original_f = 1; // 1Hz original period
+    const float original_f = 2; // 2Hz original freq (example)
     return sin(2*M_PI*original_f*t);
 }
 
 int main(void) {
     int a;
-    DDS* dds = new LutDDS(sine,1.0f,0.01f,100,0.5f);
-    //LutDDS(float (*ft)(float t),float period , float step, int npoints, float volume_percent_original)
-    //DDS* dds = new RealtimeDDS(sine,2.546479,0.2);
+    std::unique_ptr<DDS> dds = std::make_unique<LutDDS>(sine,0.5f,0.001f,10000,1.0f);
+    //std::unique_ptr<DDS> dds = std::make_unique<RealtimeDDS>(sine,0.001f,-1.0f,+1.0f);
+    
     dds->setNote(DDS::DO);
-    dds->setVolumePercent(2.0f);
-    dds->enableRealtimeVolumeControl(true);
+    //dds->setVolumePercent(2.0f);
+    //dds->enableRealtimeVolumeControl(true);
 
-    for(int i = 0; i < 120; i++) {
+    for(float time = 0; time < 0.5f; time += 0.001f) {
         dds->update();
     }
-
     return 0;
 }
