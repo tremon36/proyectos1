@@ -35,7 +35,7 @@ class DDS {
     }
 
     static float inverse_sawtooth(float t) {
-        return (1-t) * 261.63f;
+        return (1.0f/261.63f-t) * 261.63f;
     }
 
     static float triangle(float t) {
