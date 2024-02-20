@@ -9,7 +9,7 @@ int main(void) {
     int a;
     //std::unique_ptr<DDS> dds = std::make_unique<LutDDS>(sine,0.5f,0.001f,10000,1.0f);
     //std::unique_ptr<DDS> dds = std::make_unique<RealtimeDDS>(DDS::triangle,1.0f/50000.0f,0.0f,1.0f); // 50 Khz ticker
-    std::unique_ptr<DDS> dds = std::make_unique<LutDDS>(DDS::inverse_sawtooth,1.0f/261.63f,1.0f/50000.0f,10000,1.0f);
+    std::unique_ptr<DDS> dds = std::make_unique<LutDDS>(DDS::inverse_sawtooth,1.0f/50000.0f,10000);
     
     dds->setNote(DDS::DO);
     //dds->setVolumePercent(2.0f);

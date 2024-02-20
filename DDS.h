@@ -54,8 +54,6 @@ class DDS {
     virtual void enableRealtimeVolumeControl(bool enable) = 0;
     virtual void setVolumePercent(float percent) = 0;
 
-    // @TODO create some example functions
-
 
     protected:
 
@@ -70,7 +68,7 @@ class LutDDS : public DDS {
     public:
 
     
-    LutDDS(float (*ft)(float t),float period , float step, int npoints, float original_volume) {
+    LutDDS(float (*ft)(float t),float step, int npoints, float period,  float original_volume) {
 
         this->points = npoints;
 
@@ -98,6 +96,8 @@ class LutDDS : public DDS {
         }
 
     }
+
+    LutDDS(float (*ft)(float t), float step, int npoints) : LutDDS(ft,step,npoints,1.0f/261.63f,1.0f) {}; // Constructor where frequency of the function is asumed to be 261.63Hz, and original volume to be 1.0 (MAX)
 
     ~LutDDS() {
         delete LUT;
