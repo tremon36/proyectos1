@@ -74,7 +74,7 @@ class LutDDS : public DDS {
 
         // Generate LUT according to period, function and number of points
 
-        this->LUT = new int[npoints]; // using smart pointers here would just make the code either slower (std::vector) or unreadable
+        this->LUT = new uint16_t[npoints]; // using smart pointers here would just make the code either slower (std::vector) or unreadable
         float min_fn = std::numeric_limits<float>::max();
         float max_fn = std::numeric_limits<float>::min();
 
@@ -138,7 +138,7 @@ class LutDDS : public DDS {
     int steps_lut[11];
     int amount;
     int position;
-    int* LUT;
+    uint16_t* LUT;
 
 };
 
