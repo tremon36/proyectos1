@@ -144,53 +144,6 @@ class LutDDS : public DDS {
 
 };
 
-class RealtimeDDS : public DDS {
-
-    public:
-
-    RealtimeDDS(float (*ft)(float t), float step, float ft_min, float ft_max) {
-        this->step = step;
-        this->f = ft;
-        this->ft_max = ft_max;
-        this->ft_min = ft_min;
-    }
-
-    int update() {
-        return 0; //@TODO
-
-        current_time += step * multiplier;
-        if(current_time>=period) {
-            current_time-= period;
-        }    
-    }
-
-    void setNote(notas nota) {
-        this->multiplier = pow(1.06f,nota);
-    }
-
-    void enableRealtimeVolumeControl(bool enable) {
-        this->volume_control_enabled = true;
-    }
-
-    void setVolumePercent(float percent) {
-        this->volume = percent;
-    }
-
-    private:
-
-    float (*f)(float t); // function of the dds
-    float period;
-    float step;
-    float current_time = 0;
-    float multiplier = 0;
-    bool volume_control_enabled = 0;
-    int volume;
-    float ft_max = 1;
-    float ft_min = 0;
-
-
-};
-
 template<int n_channels>
 class Mixer {
 
