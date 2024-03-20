@@ -23,6 +23,8 @@
 
 LutDDS dds(DDS::square,1.0f / 30000.0f,30000);
 LutDDS dds2(DDS::square,1.0f / 30000.0f,30000);
+Mixer<2> mixer;
+
 float read_s0=0;
 float read_s1=0;
 
@@ -42,12 +44,12 @@ void setup() {
 
 
   dds.setNote(DDS::DO);
-  dds.enableRealtimeVolumeControl(true);
-  dds.setVolumePercent(50);
-
   dds2.setNote(DDS::DO);
-  dds2.enableRealtimeVolumeControl(true);
-  dds2.setVolumePercent(50);
+
+  mixer.setChannelSynth(0,&dds);
+  mixer.setChannelSynth(1,&dds2);
+  mixer.setChannelVolume(0,50);
+  mixer.setChannelVolume(1,50);
 
 }
 
@@ -87,17 +89,13 @@ void loop() {
 }
 
 void Ticker() {
-  //Serial.print("world");
+
   read_s0 = analogRead(SENSOR_0);
   read_s1 = analogRead(SENSOR_1);
+
   dds.setNote(getNote((int)read_s0));
   dds2.setNote(getNote2((int)read_s1));
-  //dds.setNote(DDS::DO);
-  //dds.setVolumePercent(getNote2((int)read_s1));
-  PWMWrite(PM_2,DDS::pwm_max,dds.update(),120000);
-  PWMWrite(PM_6,DDS::pwm_max,dds2.update(),120000);
-  //Serial.print("s0: ");
-  //Serial.println(getNote((int)read_s0));
- //Serial.print("   s1: ");
- //Serial.println(getNote((int)read_s1));
+
+  PWMWrite(PM_2,DDS::pwm_max,mixer.update(),120000);
+
 }
