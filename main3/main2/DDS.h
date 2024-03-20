@@ -209,15 +209,17 @@ class Mixer {
             synths[channel_number]->setVolumePercent(volume);
         }
 
-        int update() {
+        void update() {
             int val = 0;
             int acc = 0;
             for(int i = 0; i < n_channels; i++) {
                 val = synths[i]->update();
                 acc += val;
             }
-            
-            return acc;
+            //ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, acc);
+            //ledc_update_duty(LEDC_MODE, LEDC_CHANNEL);
+            // @TODO PWM WRITE
+
         }
 
 

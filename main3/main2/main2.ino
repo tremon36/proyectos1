@@ -22,6 +22,7 @@
 #define SENSOR_1 PE_1
 
 LutDDS dds(DDS::square,1.0f / 30000.0f,30000);
+LutDDS dds2(DDS::square,1.0f / 30000.0f,30000);
 float read_s0=0;
 float read_s1=0;
 
@@ -42,6 +43,11 @@ void setup() {
 
   dds.setNote(DDS::DO);
   dds.enableRealtimeVolumeControl(true);
+  dds.setVolumePercent(50);
+
+  dds2.setNote(DDS::DO);
+  dds2.enableRealtimeVolumeControl(true);
+  dds2.setVolumePercent(50);
 
 }
 
@@ -60,19 +66,23 @@ DDS::notas getNote(uint16_t read) {
   else return DDS::SI;
 }
 
-int getNote2(uint16_t read) {
-  if(read > 1840) return 100;
-  if(read > 1570) return 75;
-  if(read > 1400) return 50;
-  if(read > 1300) return 25;
-  else return 25;
+DDS::notas getNote2(uint16_t read) {
+  if(read > 1950) return DDS::DO;
+  if(read > 1810) return DDS::DOSHARP;
+  if(read > 1650) return DDS::RE;
+  if(read > 1500) return DDS::RESHARP;
+  if(read > 1440) return DDS::MI;
+  if(read > 1320) return DDS::FA;
+  if(read > 1240) return DDS::FASHARP;
+  if(read > 1190) return DDS::SOL;
+  if(read > 1120) return DDS::SOLSHARP;
+  if(read > 1070) return DDS::LA;
+  if(read > 1000) return DDS::LASHARP; 
+  else return DDS::SI;
 }
 
+
 void loop() {
-  //if(i < 1005)  Serial.println(dds->LUT[i]);
-  //i++;
-  //Serial.println(dds->update());
-  //PWMWrite(PM_2,1000,dds->update(),120000);
   
 }
 
@@ -81,9 +91,11 @@ void Ticker() {
   read_s0 = analogRead(SENSOR_0);
   read_s1 = analogRead(SENSOR_1);
   dds.setNote(getNote((int)read_s0));
+  dds2.setNote(getNote2((int)read_s1));
   //dds.setNote(DDS::DO);
-  dds.setVolumePercent(getNote2((int)read_s1));
-  PWMWrite(PM_2,1000,dds.update(),120000);
+  //dds.setVolumePercent(getNote2((int)read_s1));
+  PWMWrite(PM_2,DDS::pwm_max,dds.update(),120000);
+  PWMWrite(PM_6,DDS::pwm_max,dds2.update(),120000);
   //Serial.print("s0: ");
   //Serial.println(getNote((int)read_s0));
  //Serial.print("   s1: ");
